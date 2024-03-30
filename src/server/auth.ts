@@ -12,6 +12,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { createTable } from "@/server/db/schema";
+import { getUserByEmail } from "./db/users";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -41,6 +42,14 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
+    async signIn({ user }) {
+      const userEmail = user.email ?? "";
+      const userFromDb = await getUserByEmail(userEmail);
+      if (!userFromDb || userFromDb.length < 1) {
+        return false;
+      }
+      return true;
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {
