@@ -22,7 +22,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <Head>
         <title>My awesome PWA app</title>
         <meta name="description" content="Best PWA app in the world!" />
-        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/iconx/favicon.ico" />
         <link rel="mask-icon" href="/icons/mask-icon.svg" color="#FFFFFF" />
         <meta name="theme-color" content="#ffffff" />
         <link rel="apple-touch-icon" href="/icons/touch-icon-iphone.png" />
