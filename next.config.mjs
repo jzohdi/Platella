@@ -5,9 +5,8 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {
+const nextConfig = {
   reactStrictMode: true,
-
   /**
    * If you are using `appDir` then you must comment the below `i18n` config out.
    *
@@ -19,4 +18,10 @@ const config = {
   },
 };
 
-export default config;
+import withPWAInit from "@ducanh2912/next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+});
+
+export default withPWA(nextConfig);
