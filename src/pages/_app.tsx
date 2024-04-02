@@ -20,8 +20,19 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <>
       <Head>
-        <title>My awesome PWA app</title>
-        <meta name="description" content="Best PWA app in the world!" />
+        <title>Platella</title>
+        <meta
+          name="title"
+          content="Platella: Revolutionize Your Cooking Experience with Interactive Recipes & Cookbooks"
+        />
+        <meta
+          name="description"
+          content="Discover Platella, the ultimate recipe web app/PWA for food enthusiasts. Create cookbooks, manage grocery lists, share recipes, and explore our unique UX for asynchronous cooking steps"
+        />
+        <meta
+          name="keywords"
+          content="Platella, recipe app, cooking web app, cookbooks, online recipes, grocery list, recipe sharing, cooking UX, food app, meal planning"
+        />
         <link rel="shortcut icon" href="/iconx/favicon.ico" />
         <link rel="mask-icon" href="/icons/mask-icon.svg" color="#FFFFFF" />
         <meta name="theme-color" content="#ffffff" />
@@ -43,16 +54,21 @@ const MyApp: AppType<{ session: Session | null }> = ({
         />
         <link rel="manifest" href="/manifest.json" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:url" content="https://yourdomain.com" />
-        <meta name="twitter:title" content="My awesome PWA app" />
-        <meta name="twitter:description" content="Best PWA app in the world!" />
+        <meta name="twitter:url" content="https://platella.vercel.app" />
+        <meta name="twitter:title" content="Platella" />
+        <meta
+          name="twitter:description"
+          content="Rethinking the UX of digitized recipes"
+        />
         <meta name="twitter:image" content="/icons/twitter.png" />
-        <meta name="twitter:creator" content="@DavidWShadow" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="My awesome PWA app" />
-        <meta property="og:description" content="Best PWA app in the world!" />
-        <meta property="og:site_name" content="My awesome PWA app" />
-        <meta property="og:url" content="https://yourdomain.com" />
+        <meta property="og:title" content="Platella" />
+        <meta
+          property="og:description"
+          content="Rethinking the UX of digitized recipes!"
+        />
+        <meta property="og:site_name" content="Platella" />
+        <meta property="og:url" content="https://platella.vercel.app" />
         <meta property="og:image" content="/icons/og.png" />
         {/* add the following only if you want to add a startup image for Apple devices. */}
         <link
