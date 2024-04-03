@@ -1,15 +1,14 @@
 import { signIn, signOut, useSession } from "next-auth/react";
-import Link from "next/link";
 
 import { api } from "@/utils/api";
 import Layout from "@/features/Layout";
+import Library from "@/features/Library";
+import { LibraryFooterElements } from "@/features/Library/components/Footer";
 
 export default function Home() {
   return (
-    <Layout>
-      <div className="bg-blue-300 py-[200px]"></div>
-      <div className="bg-red-600 py-[200px]"></div>
-      <div className="bg-lime-500 py-[200px]"></div>
+    <Layout FooterElements={LibraryFooterElements}>
+      <Library />
     </Layout>
   );
 }

@@ -11,6 +11,9 @@ Re-inventing the wheel for recipes.
 
 <https://next-auth.js.org/providers/google>
 
+### PWA
+<https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API>
+
 ## Commands
 
   ./start-database.sh
@@ -34,6 +37,7 @@ Re-inventing the wheel for recipes.
 - [ ] record history of recipe (times) (with user) confirmation page
 - [ ] shopping cart - log prices?
 - [ ] hide steps
+- [ ] favorites (book, recipes)
 
 ### Ideas
 
