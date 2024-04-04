@@ -3,7 +3,7 @@ import { FOOTER } from "@/features/config/constants";
 import { IoLibrary } from "react-icons/io5";
 import { FaFileUpload } from "react-icons/fa";
 import getFooterActionBroker from "@/features/Layout/hooks/useFooterActions";
-import { useEffect, useState } from "react";
+import { type KeyboardEvent, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import routes from "@/features/config/routes";
 import PageHeader from "@/features/components/PageHeader";
@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,6 +25,9 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
+import VisibleLarge from "@/features/components/Breakpoints/VisibleLarge";
+import ArrayInput from "@/features/components/ArrayInput";
+import { isEmail } from "./utils/email";
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -32,6 +36,15 @@ const formSchema = z.object({
   cover: z.custom<File>((v) => v instanceof File, {
     message: "Image is required",
   }),
+  collaborators: z
+    .string()
+    .array()
+    .optional()
+    .refine((val) => {
+      val?.every((email) => {
+        return isEmail(email);
+      });
+    }),
 });
 
 function createObjectURL(image: File) {
@@ -65,6 +78,7 @@ export default function AddBookPage() {
     defaultValues: {
       title: "",
       cover: undefined,
+      collaborators: [],
     },
   });
 
@@ -93,13 +107,51 @@ export default function AddBookPage() {
       broker.unsubscribe(id, "navigate_home");
       broker.unsubscribe(id, "submit");
     };
-  }, [router]);
+  }, [router, form]);
 
   const coverImage = form.watch("cover");
-  const imagePreview = !!coverImage ? createObjectURL(coverImage) : null;
+
+  const imagePreview = useMemo(() => {
+    if (!coverImage) {
+      return null;
+    }
+    return createObjectURL(coverImage);
+  }, [coverImage]);
+
+  function handleAddEmail(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter") {
+      return;
+    }
+    e.stopPropagation();
+    e.preventDefault();
+    const value = e.currentTarget.value;
+    if (!value) {
+      return;
+    }
+    if (!isEmail(value)) {
+      return form.setError("collaborators", {
+        message: "Not a valid email",
+      });
+    }
+    const currentArr = form.getValues().collaborators;
+    const newArr = currentArr ?? [];
+    if (newArr.includes(value)) {
+      return form.setError("collaborators", {
+        message: "Email already added",
+      });
+    }
+    newArr.push(value);
+    form.setValue("collaborators", newArr);
+  }
+
+  function handleDeleteEmail(value: string) {
+    const currentArr = form.getValues().collaborators ?? [];
+    const filtered = currentArr.filter((item) => item !== value);
+    form.setValue("collaborators", filtered);
+  }
 
   return (
-    <div className="py-5">
+    <div className="m-auto max-w-[750px] py-5">
       <PageHeader
         icon={<IoBookOutline size={30} className="mr-2" />}
         title="New Book"
@@ -121,8 +173,34 @@ export default function AddBookPage() {
             )}
           />
           <FormField
-            name="cover"
+            control={form.control}
+            name="collaborators"
             render={({ field }) => (
+              <FormItem>
+                <FormLabel>Collaborators</FormLabel>
+                <FormControl>
+                  <ArrayInput
+                    handleDelete={handleDeleteEmail}
+                    placeholder="Collaborators"
+                    {...field}
+                    onKeyDown={handleAddEmail}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      return;
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Enter emails of users to share with.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="cover"
+            render={({}) => (
               <FormItem>
                 <FormLabel>Cover Photo</FormLabel>
                 <FormControl>
@@ -159,14 +237,17 @@ export default function AddBookPage() {
                   alt="preview"
                   fill
                   className="rounded-md object-cover"
+                  style={{ objectFit: "contain" }}
                 />
               )}
             </AspectRatio>
           </div>
-          <Button type="submit">
-            <FaFileUpload size={20} className="mr-2" />
-            Submit
-          </Button>
+          <VisibleLarge>
+            <Button type="submit">
+              <FaFileUpload size={20} className="mr-2" />
+              Submit
+            </Button>
+          </VisibleLarge>
         </form>
       </Form>
     </div>

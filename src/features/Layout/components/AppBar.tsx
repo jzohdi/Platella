@@ -2,6 +2,7 @@ import Image from "next/image";
 import AppLink from "../../components/AppLink";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
+import VisibleLarge from "@/features/components/Breakpoints/VisibleLarge";
 
 function makeName(name?: string | null) {
   if (!name) {
@@ -27,9 +28,9 @@ export default function AppBar() {
         <h1 className="text-xl">Platella</h1>
       </div>
       <div className="flex items-center gap-3">
-        <AppLink classNames="invisible md:visible" href="/">
-          Library
-        </AppLink>
+        <VisibleLarge>
+          <AppLink href="/">Library</AppLink>
+        </VisibleLarge>
         <Avatar>
           <AvatarFallback>{makeName(sessionData?.user.name)}</AvatarFallback>
         </Avatar>
