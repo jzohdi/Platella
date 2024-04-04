@@ -12,7 +12,11 @@ Re-inventing the wheel for recipes.
 <https://next-auth.js.org/providers/google>
 
 ### PWA
+
 <https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API>
+
+### Form Field
+<https://stackoverflow.com/questions/75713051/react-hook-form-zod-what-is-the-recommended-way-of-handling-image-uploads-in-a>
 
 ## Commands
 

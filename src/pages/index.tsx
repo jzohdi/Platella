@@ -2,12 +2,11 @@ import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "@/utils/api";
 import Layout from "@/features/Layout";
-import Library from "@/features/Library";
-import { LibraryFooterElements } from "@/features/Library/components/Footer";
+import Library, { libraryFooterActions } from "@/features/pages/Library";
 
 export default function Home() {
   return (
-    <Layout FooterElements={LibraryFooterElements}>
+    <Layout footerELements={libraryFooterActions}>
       <Library />
     </Layout>
   );

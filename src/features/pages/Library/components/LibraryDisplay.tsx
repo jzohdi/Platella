@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import routes from "@/features/config/routes";
 import Link from "next/link";
 import { CiCirclePlus } from "react-icons/ci";
 
@@ -16,13 +16,15 @@ export default function LibraryDisplay() {
 
 function AddBookButton() {
   return (
-    <Button
-      variant="outline"
-      className="hidden h-[300px] w-[200px] md:inline-block"
+    <Link
+      href={routes.addBook}
+      className="hidden h-[300px] w-[200px] justify-center rounded-sm border-[1px] border-zinc-300 transition-all hover:bg-slate-300 focus:bg-slate-400 md:flex"
     >
-      <CiCirclePlus size={30} className="mr-2" />
-      Add Book
-    </Button>
+      <div className="flex items-center justify-center">
+        <CiCirclePlus size={30} className="mr-2" />
+        Add Book
+      </div>
+    </Link>
   );
 }
 
