@@ -3,6 +3,7 @@ import type { PropsWithChildren } from "react";
 import Footer, { type FooterProps } from "./components/Footer";
 import AppBar from "./components/AppBar";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { Toaster } from "@/components/ui/toaster";
 
 type LayoutProps = FooterProps;
 
@@ -22,9 +23,10 @@ export default function Layout({
     <div className="flex h-screen flex-col justify-between">
       <AppBar />
       <ScrollArea className="flex-grow">
-        <div className="max-w-[1200px] px-3">{!!data && children}</div>
+        <div className="m-auto max-w-[1200px] px-3">{!!data && children}</div>
       </ScrollArea>
       <Footer footerELements={footerELements} />
+      <Toaster />
     </div>
   );
 }

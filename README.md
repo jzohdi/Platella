@@ -4,18 +4,24 @@ Re-inventing the wheel for recipes.
 
 ## Design
 
-[excalidraw][1]
-[excalidraw][2]
+[excalidraw v1][1]
+[excalidraw v2][2]
 
 ## Docs
 
 <https://next-auth.js.org/providers/google>
+
+### S3 presigned urls
+
+<https://aws.amazon.com/blogs/developer/generate-presigned-url-modular-aws-sdk-javascript/>
+<https://advancedweb.hu/how-to-use-s3-post-signed-urls/>
 
 ### PWA
 
 <https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API>
 
 ### Form Field
+
 <https://stackoverflow.com/questions/75713051/react-hook-form-zod-what-is-the-recommended-way-of-handling-image-uploads-in-a>
 
 ## Commands
@@ -26,8 +32,10 @@ Re-inventing the wheel for recipes.
 
 ## TODO
 
+- [ ]
 - [ ] friends list
 - [ ] library of cook books
+- [ ]
 - [ ] share book to friend - copy or collaborator
 - [ ] share recipe to friend
   - [ ] goes to "shared with me"
@@ -47,5 +55,11 @@ Re-inventing the wheel for recipes.
 
 - [ ] keyword - definition book
 - [ ] attach
+
+### Ben Ideas
+
+- [ ] smart entering of recipes
+- [ ]  
+
 [1]: <https://excalidraw.com/#json=F6fSd6dAPCN5CgukOjH6L,loECwmXvld_HYy9sYGvzTg>
 [2]: <https://excalidraw.com/#json=AuWhfPVllWt4J3GMsJ8Bg,laRvCg3Jqhqb17Rxaruf5w>

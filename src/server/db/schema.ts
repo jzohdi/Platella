@@ -1,7 +1,13 @@
-import { relations, sql } from "drizzle-orm";
+import {
+  relations,
+  sql,
+  type InferSelectModel,
+  InferColumnsDataTypes,
+} from "drizzle-orm";
 import {
   index,
   integer,
+  pgEnum,
   pgTableCreator,
   primaryKey,
   text,
@@ -9,6 +15,14 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
+import { createId } from "@paralleldrive/cuid2";
+
+//  ============== start common types ============
+
+const varCharUuid = (name: string) => varchar(name, { length: 128 });
+export const roleEnum = pgEnum("role", ["viewer", "collaborator", "owner"]);
+
+// =================================================
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -34,9 +48,31 @@ export const users = createTable(
   }),
 );
 
+export type DbUser = InferSelectModel<typeof users>;
+
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  usersToBooks: many(usersToBooks),
 }));
+
+export const usersToBooks = createTable(
+  "users_to_books",
+  {
+    userId: varchar("userId", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    bookId: varCharUuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    role: roleEnum("role").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.bookId] }),
+    userIdx: index("user_to_books_user_idx").on(t.userId),
+  }),
+);
+
+export type UsersToBooks = InferSelectModel<typeof usersToBooks>;
 
 export const accounts = createTable(
   "account",
@@ -89,14 +125,41 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
 
-export const verificationTokens = createTable(
-  "verificationToken",
+// ======== books with permissions =================
+export const books = createTable("recipe_books", {
+  id: varCharUuid("id")
+    .$defaultFn(() => createId())
+    .unique()
+    .primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+});
+
+export const bookRelations = relations(books, ({ many }) => ({
+  usersToBooks: many(usersToBooks),
+  booksToImages: many(booksToImages),
+}));
+
+export const booksToImages = createTable(
+  "books_to_images",
   {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    token: varchar("token", { length: 255 }).notNull(),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
+    bookId: varCharUuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    imageId: varCharUuid("image_id")
+      .notNull()
+      .references(() => images.id, { onDelete: "cascade" }),
   },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  (t) => ({
+    pk: primaryKey({ columns: [t.bookId, t.imageId] }),
   }),
 );
+
+// ========== images with relations =====================
+
+export const images = createTable("images", {
+  id: varCharUuid("id").notNull().unique().primaryKey(),
+});
+
+export const imageRelations = relations(images, ({ many }) => ({
+  booksToImages: many(booksToImages),
+}));

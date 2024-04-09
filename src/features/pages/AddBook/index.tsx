@@ -3,7 +3,13 @@ import { FOOTER } from "@/features/config/constants";
 import { IoLibrary } from "react-icons/io5";
 import { FaFileUpload } from "react-icons/fa";
 import getFooterActionBroker from "@/features/Layout/hooks/useFooterActions";
-import { type KeyboardEvent, useEffect, useMemo } from "react";
+import {
+  type KeyboardEvent,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useRouter } from "next/router";
 import routes from "@/features/config/routes";
 import PageHeader from "@/features/components/PageHeader";
@@ -27,33 +33,22 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import VisibleLarge from "@/features/components/Breakpoints/VisibleLarge";
 import ArrayInput from "@/features/components/ArrayInput";
-import { isEmail } from "./utils/email";
+import { isEmail } from "../../../utils/email";
+import { api } from "@/utils/api";
+import { bookTitle, listOfEmails } from "@/utils/zod";
+import { uploadFileToAws } from "@/utils/fetch";
+import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 const formSchema = z.object({
-  title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
-  }),
+  title: bookTitle,
   cover: z.custom<File>((v) => v instanceof File, {
-    message: "Image is required",
+    message: "Cover photo is required",
   }),
-  collaborators: z
-    .string()
-    .array()
-    .optional()
-    .refine((val) => {
-      val?.every((email) => {
-        return isEmail(email);
-      });
-    }),
+  collaborators: listOfEmails,
 });
 
 function createObjectURL(image: File) {
-  // const binaryData = [];
-  // binaryData.push(data);
-  // URL.createObjectURL(coverImage);
-  // return window.URL.createObjectURL(
-  //   new Blob(binaryData, { type: "application/zip" }),
-  // );
   return URL.createObjectURL(image);
 }
 
@@ -69,9 +64,13 @@ export const addBookFooterActions: FooterElement[] = [
 ] as const;
 
 const broker = getFooterActionBroker();
+const BROKER_ID = "add_book_page";
+let submitData: z.infer<typeof formSchema> | null = null;
 
 export default function AddBookPage() {
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,35 +81,20 @@ export default function AddBookPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
-  }
-
-  useEffect(() => {
-    const id = "add_book_page";
-
-    broker.subscribe(id, "navigate_home", () => {
-      router.push(routes.library).catch((e) => {
-        console.log("could not route home", e);
-      });
+  const handleSucces = () => {
+    const imageInput = imageInputRef.current;
+    if (!imageInput) {
       return;
+    }
+    imageInput.value = "";
+    form.reset();
+    submitData = null;
+    router.push(routes.library).catch((e) => {
+      console.log("could not navigate to library", e);
     });
-
-    broker.subscribe(id, "submit", () => {
-      console.log("submit new book");
-      form.handleSubmit(onSubmit);
-    });
-
-    return () => {
-      broker.unsubscribe(id, "navigate_home");
-      broker.unsubscribe(id, "submit");
-    };
-  }, [router, form]);
+  };
 
   const coverImage = form.watch("cover");
-
   const imagePreview = useMemo(() => {
     if (!coverImage) {
       return null;
@@ -118,30 +102,126 @@ export default function AddBookPage() {
     return createObjectURL(coverImage);
   }, [coverImage]);
 
-  function handleAddEmail(e: KeyboardEvent<HTMLInputElement>) {
+  const { mutate: createBook, isSuccess: isBookSuccess } =
+    api.book.create.useMutation({
+      onError(error) {
+        toast({
+          variant: "destructive",
+          title: "Could not create Book",
+          description: error.message,
+          action: <ToastAction altText="Close">Close</ToastAction>,
+        });
+      },
+      onSuccess: () => handleSucces(),
+    });
+  const {
+    data: presignUrlData,
+    mutate: mutatePresignedUrl,
+    isPending,
+  } = api.file.getPresignedUrl.useMutation();
+
+  useEffect(() => {
+    if (submitData === null || !presignUrlData) {
+      return;
+    }
+    const { title, cover, collaborators } = submitData;
+    const { url, id } = presignUrlData;
+    if (!url || !id || !title || !cover) {
+      return;
+    }
+
+    const imageInput = imageInputRef.current;
+    if (!imageInput) {
+      return;
+    }
+    imageInput.value = "";
+    // await uploadFileToAws(url, file);
+    createBook({
+      title: title,
+      collaborators: collaborators,
+      coverKey: id,
+    });
+  }, [presignUrlData, form, createBook]);
+
+  useEffect(() => {
+    if (!isBookSuccess) {
+      return;
+    }
+    const imageInput = imageInputRef.current;
+    if (!imageInput) {
+      return;
+    }
+    imageInput.value = "";
+    form.reset();
+    submitData = null;
+    router.push(routes.library).catch((e) => {
+      console.log("could not navigate to library", e);
+    });
+  }, [isBookSuccess, form, router]);
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (!isPending) {
+      mutatePresignedUrl({ fetch: true });
+      submitData = values;
+    }
+  };
+
+  broker.subscribe(BROKER_ID, "navigate_home", () => {
+    router.push(routes.library).catch((e) => {
+      console.log("could not route home", e);
+    });
+    return;
+  });
+
+  broker.subscribe(BROKER_ID, "submit", () => {
+    form
+      .handleSubmit(onSubmit)()
+      .catch((e) => {
+        console.log("could not submit form", e);
+      });
+  });
+
+  useEffect(() => {
+    return () => {
+      broker.unsubscribe(BROKER_ID, "navigate_home");
+      broker.unsubscribe(BROKER_ID, "submit");
+    };
+  }, []);
+
+  function handleKeyDownEmail(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key !== "Enter") {
       return;
     }
     e.stopPropagation();
     e.preventDefault();
     const value = e.currentTarget.value;
+    const didAdd = handleAddEmail(value);
+    if (didAdd) {
+      e.currentTarget.value = "";
+    }
+  }
+
+  function handleAddEmail(value: string) {
     if (!value) {
-      return;
+      return false;
     }
     if (!isEmail(value)) {
-      return form.setError("collaborators", {
+      form.setError("collaborators", {
         message: "Not a valid email",
       });
+      return false;
     }
     const currentArr = form.getValues().collaborators;
     const newArr = currentArr ?? [];
     if (newArr.includes(value)) {
-      return form.setError("collaborators", {
+      form.setError("collaborators", {
         message: "Email already added",
       });
+      return false;
     }
     newArr.push(value);
     form.setValue("collaborators", newArr);
+    return true;
   }
 
   function handleDeleteEmail(value: string) {
@@ -183,7 +263,7 @@ export default function AddBookPage() {
                     handleDelete={handleDeleteEmail}
                     placeholder="Collaborators"
                     {...field}
-                    onKeyDown={handleAddEmail}
+                    onKeyDown={handleKeyDownEmail}
                     onChange={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
@@ -199,12 +279,15 @@ export default function AddBookPage() {
             )}
           />
           <FormField
+            control={form.control}
             name="cover"
-            render={({}) => (
+            render={({ field: { onChange, value, ...rest } }) => (
               <FormItem>
                 <FormLabel>Cover Photo</FormLabel>
                 <FormControl>
                   <Input
+                    {...rest}
+                    ref={imageInputRef}
                     accept="image/*"
                     type="file"
                     placeholder="Cover Photo"

@@ -13,12 +13,12 @@ export default forwardRef<HTMLInputElement, ArrayInputProps>(
   function ArrayInput({ value, handleDelete, ...rest }, ref) {
     return (
       <div className="relative">
-        <span>
+        <span className="flex flex-wrap gap-1">
           {value?.map((item) => {
             return (
               <Badge
                 key={item}
-                className="text-md pl-5 pr-1"
+                className="text-md cursor-pointer pl-5 pr-1"
                 onClick={() => handleDelete(item)}
               >
                 <span className="flex items-center">
@@ -29,7 +29,7 @@ export default forwardRef<HTMLInputElement, ArrayInputProps>(
             );
           })}
         </span>
-        <Spacer size={5} />
+        <Spacer size={10} />
         <Input {...rest} ref={ref} />
       </div>
     );
