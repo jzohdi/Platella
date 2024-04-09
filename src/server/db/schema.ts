@@ -1,9 +1,4 @@
-import {
-  relations,
-  sql,
-  type InferSelectModel,
-  InferColumnsDataTypes,
-} from "drizzle-orm";
+import { relations, sql, type InferSelectModel } from "drizzle-orm";
 import {
   index,
   integer,

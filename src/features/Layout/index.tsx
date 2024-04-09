@@ -2,7 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { PropsWithChildren } from "react";
 import Footer, { type FooterProps } from "./components/Footer";
 import AppBar from "./components/AppBar";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { Toaster } from "@/components/ui/toaster";
 
 type LayoutProps = FooterProps;

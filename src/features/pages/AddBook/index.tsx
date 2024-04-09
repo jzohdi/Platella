@@ -3,13 +3,7 @@ import { FOOTER } from "@/features/config/constants";
 import { IoLibrary } from "react-icons/io5";
 import { FaFileUpload } from "react-icons/fa";
 import getFooterActionBroker from "@/features/Layout/hooks/useFooterActions";
-import {
-  type KeyboardEvent,
-  useEffect,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import { type KeyboardEvent, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/router";
 import routes from "@/features/config/routes";
 import PageHeader from "@/features/components/PageHeader";
@@ -129,18 +123,17 @@ export default function AddBookPage() {
     if (!url || !id || !title || !cover) {
       return;
     }
-
-    const imageInput = imageInputRef.current;
-    if (!imageInput) {
-      return;
-    }
-    imageInput.value = "";
-    // await uploadFileToAws(url, file);
-    createBook({
-      title: title,
-      collaborators: collaborators,
-      coverKey: id,
-    });
+    uploadFileToAws(url, cover)
+      .then(() => {
+        createBook({
+          title: title,
+          collaborators: collaborators,
+          coverKey: id,
+        });
+      })
+      .catch((e) => {
+        console.log("could not upload image", e);
+      });
   }, [presignUrlData, form, createBook]);
 
   useEffect(() => {

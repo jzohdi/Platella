@@ -1,4 +1,3 @@
-import { type CreateBookInput } from "@/server/api/routers/book";
 import { db } from "@/server/db";
 import {
   type DbUser,
