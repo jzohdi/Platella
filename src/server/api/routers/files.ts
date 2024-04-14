@@ -19,6 +19,7 @@ export const filesRouter = createTRPCRouter({
       const command = new PutObjectCommand({
         Bucket: "platella",
         Key: fileName,
+        ACL: "public-read",
       });
       const url = await getSignedUrl(awsClient, command, { expiresIn: 3600 });
       return { url, id };

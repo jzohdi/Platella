@@ -10,7 +10,7 @@ import {
   type UsersToBooks,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export async function findUsersWhereEmailIn(emails: string[]) {
   return await db
@@ -55,3 +55,36 @@ export async function createNewBook(
   }
   return newBook;
 }
+
+export async function getListOfBooks(userId: string) {
+  const listOfBooks = await db
+    .select()
+    .from(books)
+    .fullJoin(usersToBooks, eq(usersToBooks.bookId, books.id))
+    .fullJoin(booksToImages, eq(booksToImages.bookId, books.id))
+    .where(eq(usersToBooks.userId, userId));
+  return listOfBooks;
+}
+
+export async function getBookByIdAndUser(bookId: string, userId: string) {
+  return await db
+    .select()
+    .from(books)
+    .fullJoin(usersToBooks, eq(usersToBooks.bookId, books.id))
+    .fullJoin(booksToImages, eq(booksToImages.bookId, books.id))
+    .fullJoin(users, eq(users.id, usersToBooks.userId))
+    .where(and(eq(usersToBooks.userId, userId), eq(books.id, bookId)));
+}
+
+// export async function getBookByIdAndUser(bookId: string, userId: string) {
+//   return await db.execute(
+//     sql`select * from ${books} join (
+// 					select * from ${usersToBooks}
+// 					where ${usersToBooks.bookId} = ${bookId}
+// 					and ${usersToBooks.userId} = ${userId}) roles
+// 				on ${books.id} = roles.book_id
+// 				join ${booksToImages} on ${booksToImages.bookId} = ${bookId}
+// 				join ${users} on ${users.id} = roles.user_id
+// 				`,
+//   );
+// }

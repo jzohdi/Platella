@@ -53,7 +53,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const usersToBooks = createTable(
   "users_to_books",
   {
-    userId: varchar("userId", { length: 255 })
+    userId: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     bookId: varCharUuid("book_id")

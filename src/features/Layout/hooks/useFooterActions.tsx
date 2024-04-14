@@ -1,4 +1,9 @@
-export type FooterAction = "favorite" | "new" | "navigate_home" | "submit";
+export type FooterAction =
+  | "favorite"
+  | "new"
+  | "navigate_home"
+  | "delete"
+  | "submit";
 
 type FooterActionListener = (payload: unknown) => void;
 
